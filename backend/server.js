@@ -40,26 +40,26 @@ function checkFileType(file, cb) {
 
 
 // Handle file upload
-app.post('/upload', (req, res) => {
-  upload(req, res, (err) => {
-    if (err) {
-      res.status(400).send({ error: err }); // Send error as JSON
-    } else {
-      const uploadedFilePath = path.join(__dirname, 'uploads', req.file.filename);
-      const dataToAppend = Buffer.from([0x74, 0x65, 0x73, 0x74]); // 'test' in hexadecimal
-
-      fs.appendFile(uploadedFilePath, dataToAppend, (err) => {
-        if (err) {
-          console.log('Error appending data:', err);
-          res.status(500).send({ error: 'Failed to append data' });
-        } else {
-          console.log('Data appended successfully');
-          res.send('File Uploaded and Data Appended Successfully!');
-        }
-      });
-    }
+app.post('/uploads', (req, res) => {
+    upload(req, res, (err) => {
+      if (err) {
+        res.status(400).send({ error: err }); // Send error as JSON
+      } else {
+        const uploadedFilePath = path.join(__dirname, 'uploads', req.file.filename);
+        const dataToAppend = Buffer.from([0x74, 0x65, 0x73, 0x74]); // 'test' in hexadecimal
+  
+        fs.appendFile(uploadedFilePath, dataToAppend, (err) => {
+          if (err) {
+            console.log('Error appending data:', err);
+            res.status(500).send({ error: 'Failed to append data' });
+          } else {
+            console.log('Data appended successfully');
+            res.send({ filePath: uploadedFilePath, message: 'File Uploaded and Data Appended Successfully!' });
+          }
+        });
+      }
+    });
   });
-});
 
 app.get('/read-message/:filename', (req, res) => {
     const filename = req.params.filename;

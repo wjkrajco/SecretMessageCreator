@@ -4,44 +4,43 @@ import axios from "axios";
 export default function ImageUpload() {
   const fileInput = useRef(null);
   const previewImage = useRef(null);
-  const [uploadedFileName, setUploadedFileName] = useState(null);
+  const [uploadedFilePath, setUploadedFilePath] = useState(null);
 
   function previewImageFunction() {
-    if (fileInput.current.files && fileInput.current.files[0]) {
-        const reader = new FileReader();
-
-        reader.onload = function (e) {
-            previewImage.current.src = e.target.result;
-            previewImage.current.style.display = "block";
-        };
-
-        reader.readAsDataURL(fileInput.current.files[0]);
-    }
-}
-
-
-function handleUpload() {
     const file = fileInput.current.files[0];
     const formData = new FormData();
     formData.append('image', file);
 
-    axios.post('http://localhost:3000/upload', formData)
+    axios.post('http://localhost:3000/uploads', formData)
       .then((response) => {
         alert('File uploaded successfully!');
-        setUploadedFileName(file.name);
+        setUploadedFilePath(response.data.filePath);
       })
       .catch((error) => alert('An error occurred while uploading the file: ' + error));
   }
 
-  function getMessage() {
-    if (uploadedFileName) {
-      axios.get(`http://localhost:3000/read-message/${uploadedFileName}`)
+  function addSecretMessage() {
+    if (uploadedFilePath) {
+      const secretMessage = prompt('Please enter the secret message:');
+      axios.post(`http://localhost:3000/add-message`, { filePath: uploadedFilePath, message: secretMessage })
+        .then(() => {
+          alert('Secret Message Added Successfully!');
+        })
+        .catch((error) => alert('An error occurred while adding the message: ' + error));
+    } else {
+      alert('Please preview a file first.');
+    }
+  }
+
+  function getSecretMessage() {
+    if (uploadedFilePath) {
+      axios.get(`http://localhost:3000/get-message/${uploadedFilePath}`)
         .then((response) => {
           alert('Secret Message: ' + response.data.message);
         })
-        .catch((error) => alert('An error occurred while reading the message: ' + error));
+        .catch((error) => alert('An error occurred while getting the message: ' + error));
     } else {
-      alert('Please upload a file first.');
+      alert('Please preview a file first.');
     }
   }
 
@@ -49,9 +48,9 @@ function handleUpload() {
     <>
       <form>
         <input type="file" id="imageUpload" accept="image/*" ref={fileInput} />
-        <button type="button" onClick={previewImageFunction}>Preview</button>
-        <button type="button" onClick={handleUpload}>Upload</button>
-        <button type="button" onClick={getMessage}>Get Secret Message</button>
+        <button type="button" onClick={previewImageFunction}>Preview & Upload</button>
+        <button type="button" onClick={addSecretMessage}>Add Secret Message</button>
+        <button type="button" onClick={getSecretMessage}>Get Secret Message</button>
       </form>
       <img id="preview" src="" alt="Image preview" ref={previewImage} />
     </>

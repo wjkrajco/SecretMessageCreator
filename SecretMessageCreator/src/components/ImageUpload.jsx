@@ -3,14 +3,22 @@ import axios from "axios";
 
 export default function ImageUpload() {
   const fileInput = useRef(null);
-  const previewImage = useRef(null);
   const [uploadedFilePath, setUploadedFilePath] = useState(null);
+  const [previewURL, setPreviewURL] = useState(null);
 
   function previewImageFunction() {
     const file = fileInput.current.files[0];
     const formData = new FormData();
     formData.append('image', file);
 
+    // Read and preview the selected file
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewURL(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload the file
     axios.post('http://localhost:3000/uploads', formData)
       .then((response) => {
         alert('File uploaded successfully!');
@@ -52,7 +60,7 @@ export default function ImageUpload() {
         <button type="button" onClick={addSecretMessage}>Add Secret Message</button>
         <button type="button" onClick={getSecretMessage}>Get Secret Message</button>
       </form>
-      <img id="preview" src="" alt="Image preview" ref={previewImage} />
+      {previewURL && <img id="preview" src={previewURL} alt="Image preview" />} {/* Updated line */}
     </>
   );
 }

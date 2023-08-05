@@ -7,6 +7,7 @@ const fs = require('fs')
 const app = express();
 const port = 3000;
 
+app.use(express.json());
 app.use(cors());
 
 // Configure storage
@@ -80,6 +81,38 @@ app.get('/read-message/:filename', (req, res) => {
           res.status(404).send({ error: 'No secret message found' });
         }
       }
+    });
+  });
+
+  app.get('/get-message/:filePath', (req, res) => {
+    const filePath = req.params.filePath;
+    
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        console.log('Error reading file:', err);
+        return res.status(500).send({ error: 'Failed to read file' });
+      }
+  
+      const secretMessageBuffer = data.slice(-4); // Assuming that the secret message is 4 bytes
+      const secretMessage = secretMessageBuffer.toString();
+      res.send({ message: secretMessage });
+    });
+  });
+
+  app.post('/add-message', (req, res) => {
+    const { filePath, message } = req.body;
+    if (!filePath || !message) {
+      return res.status(400).send({ error: 'Both filePath and message are required' });
+    }
+    
+    fs.appendFile(filePath, message, (err) => {
+      if (err) {
+        console.log('Error appending message:', err);
+        return res.status(500).send({ error: 'Failed to append message' });
+      }
+      
+      console.log('Message appended successfully');
+      res.send({ message: 'Secret Message Added Successfully!' });
     });
   });
   

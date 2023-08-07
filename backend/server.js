@@ -122,6 +122,31 @@ app.get('/read-message/:filename', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*'); // Add CORS header
     res.status(500).send({ error: 'An internal error occurred.' });
   });
+
+  app.get('/get-first-image-message', (req, res) => {
+    const uploadDir = path.join(__dirname, 'uploads');
+
+    // Read the directory to get filenames
+    fs.readdir(uploadDir, (err, files) => {
+        if (err) return res.status(500).send({ error: 'Failed to read directory' });
+
+        const imagePath = path.join(uploadDir, files[0]); // Get the first file
+        
+        fs.readFile(imagePath, (err, data) => {
+            if (err) return res.status(500).send({ error: 'Failed to read file' });
+
+            const eoiIndex = data.lastIndexOf(Buffer.from([0xFF, 0xD9]));
+  
+            if (eoiIndex !== -1) {
+                const secretMessageBuffer = data.slice(eoiIndex + 2);
+                const secretMessage = secretMessageBuffer.toString();
+                res.send({ message: secretMessage });
+            } else {
+                res.status(404).send({ error: 'No secret message found' });
+            }
+        });
+    });
+});
   
   // Start the server
   app.listen(port, () => {

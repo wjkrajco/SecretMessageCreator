@@ -3,6 +3,7 @@ import CurrentMessage from "/home/wjkrajco/personalprojects/SecretMessageCreator
 import AddSecretMessage from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/AddSecretMessage"
 import ImageUpload from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/ImageUpload.jsx"
 import './App.css'
+import ImageDownload from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/ImageDownload.jsx"
 
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
       <CurrentMessage />
       <AddSecretMessage />
       <ImageUpload />
+      <ImageDownload />
     </>
   )
 }

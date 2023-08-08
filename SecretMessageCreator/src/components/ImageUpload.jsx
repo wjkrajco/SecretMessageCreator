@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import axios from "axios";
 
+axios.defaults.withCredentials = true; // Ensuring credentials (like cookies) are sent with every request made by axios
+
 export default function ImageUpload() {
   const fileInput = useRef(null);
   const [uploadedFilePath, setUploadedFilePath] = useState(null);
@@ -8,6 +10,12 @@ export default function ImageUpload() {
 
   function previewImageFunction() {
     const file = fileInput.current.files[0];
+
+    if (!file) {
+      alert("Please choose a file before uploading.");
+      return; // exit the function early if no file selected
+    }
+    
     const formData = new FormData();
     formData.append('image', file);
 
@@ -27,40 +35,13 @@ export default function ImageUpload() {
       .catch((error) => alert('An error occurred while uploading the file: ' + error));
   }
 
-  function addSecretMessage() {
-    if (uploadedFilePath) {
-      const secretMessage = prompt('Please enter the secret message:');
-      axios.post(`http://localhost:3000/add-message`, { filePath: uploadedFilePath, message: secretMessage })
-        .then(() => {
-          alert('Secret Message Added Successfully!');
-        })
-        .catch((error) => alert('An error occurred while adding the message: ' + error));
-    } else {
-      alert('Please preview a file first.');
-    }
-  }
-
-  function getSecretMessage() {
-    if (uploadedFilePath) {
-      axios.get(`http://localhost:3000/get-message/${uploadedFilePath}`)
-        .then((response) => {
-          alert('Secret Message: ' + response.data.message);
-        })
-        .catch((error) => alert('An error occurred while getting the message: ' + error));
-    } else {
-      alert('Please preview a file first.');
-    }
-  }
-
   return (
     <>
       <form>
         <input type="file" id="imageUpload" accept="image/*" ref={fileInput} />
         <button type="button" onClick={previewImageFunction}>Preview & Upload</button>
-        <button type="button" onClick={addSecretMessage}>Add Secret Message</button>
-        <button type="button" onClick={getSecretMessage}>Get Secret Message</button>
       </form>
-      {previewURL && <img id="preview" src={previewURL} alt="Image preview" />} {/* Updated line */}
+      {previewURL && <img id="preview" src={previewURL} alt="Image preview" />}
     </>
   );
 }

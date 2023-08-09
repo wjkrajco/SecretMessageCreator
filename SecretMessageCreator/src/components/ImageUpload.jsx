@@ -38,7 +38,7 @@ export default function ImageUpload() {
   return (
     <>
       <form>
-        <input type="file" id="imageUpload" accept="image/*" ref={fileInput} />
+        <input className="choose-file-button"type="file" id="imageUpload" accept="image/*" ref={fileInput} />
         <button type="button" onClick={previewImageFunction}>Preview & Upload</button>
       </form>
       {previewURL && <img id="preview" src={previewURL} alt="Image preview" />}

@@ -22,8 +22,8 @@ export default function AddSecretMessage({ imagePath }) {
     }
 
     return (
-        <div>
-            <textarea rows="5" cols="20" id="secretmessage-box" defaultValue="Hello"></textarea>
+        <div className="add-secret-container">
+            <textarea placeholder="Enter message here... "id="secretmessage-box" defaultValue="Hello"></textarea>
             <button type="button" id="secretmessage-button" onClick={handleClick}>Upload Secret Message</button>
         </div>
     );

@@ -15,7 +15,7 @@ export default function CurrentMessage() {
     }
 
     return(
-        <div>
+        <div className="current-message-container">
             <button type="button" onClick={fetchMessage}>Reveal Current Message</button>
             <p>{message}</p>
         </div>

@@ -67,19 +67,10 @@ button:hover {
 } */
 
 
-
-.nav {
-  display: flex;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: purple;
-  width: 100%;
+.fab {
+  font-size: 30px;
 }
 
-.nav-title {
-  color: rgb(255, 255, 255);
-}
 
 .container {
   display: flex;
@@ -89,9 +80,31 @@ button:hover {
   margin: auto;
   background-color: #35304f;
   padding: 10px;
-  height: 550px;
+  height: 750px;
   width: 500px;
   border-radius: 5%;
+  padding-bottom: 20px;
+  padding-top: 5px;
+}
+
+.nav {
+  text-align: center;
+  margin-top: 0;
+  padding: 0;
+}
+
+.nav-title {
+  color: #d5d3e2;
+  font-size: 48px;
+  line-height: 10px;
+  font-family: 'Fredericka the Great', cursive;
+}
+.nav > p {
+  background-color: #191632;
+  border-radius: 10px;
+  color: #aca7c8;
+  font-size: 20px;
+  padding: 5px;
 }
 
 .choose-file-button {
@@ -108,7 +121,7 @@ button:hover {
   height: 150px;
   width: 250px;
   height: 150px;
-  top: 180px;
+  top: 255px;
   z-index: 2;
   border-radius: 10px;
   color:#aca7c8;
@@ -121,7 +134,7 @@ button:hover {
   min-height: 150px;
   max-width: 250px;
   max-height: 150px;
-  top: 180px;
+  top: 255px;
   object-fit: cover;
   border: 5px solid #191632;
   border-radius: 10px;
@@ -151,10 +164,27 @@ button:hover {
 textarea {
   max-width: 80%;
   min-width: 80%;
-  min-height: 140px;
-  max-height: 140px;
+  min-height: 150px;
+  max-height: 150px;
   background-color: rgb(242, 238, 238);
+  border-radius: 10px;
+  border: 5px solid #191632;
 }
+
+.download-button {
+  width: 80%;
+}
+
+.credit {
+  position: absolute;
+  bottom: 0;
+  right: 20px;
+  color:#aca7c8;
+}
+
+
+
+
 
 
 

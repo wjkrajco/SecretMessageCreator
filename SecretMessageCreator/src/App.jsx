@@ -11,15 +11,20 @@ function App() {
   return (
     <>
 
-      <Nav />
+      
       <div className="container">
+        <Nav />
         <ImageUpload />
+
         <div className="image-background">
           <p>No Image Uploaded</p>
         </div>
+
         <CurrentMessage />
         <AddSecretMessage />
         <ImageDownload />
+
+        <p className="credit">William Krajcovic 2023</p>
       </div>
     </>
   )

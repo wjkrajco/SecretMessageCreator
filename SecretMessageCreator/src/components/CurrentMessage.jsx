@@ -16,8 +16,8 @@ export default function CurrentMessage() {
 
     return(
         <div className="current-message-container">
-            <button type="button" onClick={fetchMessage}>Reveal Current Message</button>
-            <p>{message}</p>
+            <button type="button" className="current-message-button"onClick={fetchMessage}>Reveal Current Message</button>
+            <textarea readOnly className="current-message" placeholder="Current message is..." value={message}></textarea>
         </div>
     );
 }

@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
-const fs = require('fs')
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -20,16 +20,6 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   },
 });
-
-
-// Configures express-sessions
-const session = require('express-session');
-
-app.use(session({
-  secret: 'your-secret-key', 
-  resave: false, 
-  saveUninitialized: true
-}));
 
 const upload = multer({
   storage: storage,
@@ -67,7 +57,6 @@ function getFirstImagePath(callback) {
   });
 }
 
-
 // Handle file upload
 app.post('/uploads', (req, res) => {
   upload(req, res, (err) => {
@@ -76,48 +65,110 @@ app.post('/uploads', (req, res) => {
     } else {
       const uploadedFilePath = path.join(__dirname, 'uploads', req.file.filename);
 
-      // If a previous file exists for this user's session, delete it
-      if (req.session.currentFilePath) {
-        fs.unlink(req.session.currentFilePath, err => {
-          if (err) {
-            console.error("Error deleting the previous file:", err);
-          }
-        });
-      }
-
-      // Update the user's session with the path of the newly uploaded file
-      req.session.currentFilePath = uploadedFilePath;
-
-      console.log('File uploaded successfully');
+      console.log('File uploaded successfully to', uploadedFilePath);
       res.send({ filePath: uploadedFilePath, message: 'File Uploaded Successfully!' });
     }
   });
 });
 
-app.get('/get-first-image-message', (req, res) => {
-  // Check if there's a current file in the user's session
-  if (!req.session.currentFilePath) {
-      return res.status(404).send({ error: 'No file uploaded during this session' });
-  }
+app.get('/download', (req, res) => {
+  getFirstImagePath((err, imagePath) => {
+      if (err || !imagePath) {
+          console.log('Error fetching the image path:', err);
+          return res.status(404).send({ error: 'No files found in the uploads directory' });
+      }
 
-  // Use the file path from the session
-  const filePath = req.session.currentFilePath;
+      // Set headers for file download
+      res.setHeader('Content-Disposition', 'attachment; filename=image.jpg');
+      res.setHeader('Content-Type', 'image/jpeg');
 
-  fs.readFile(filePath, (err, data) => {
+      // Use a read stream to serve the file
+      const fileStream = fs.createReadStream(imagePath);
+      fileStream.pipe(res);
+  });
+});
+
+app.post('/clear-message', (req, res) => {
+  getFirstImagePath((err, imagePath) => {
+    if (err || !imagePath) {
+      console.log('Error fetching the image path:', err);
+      return res.status(404).send({ error: 'No files found in the uploads directory' });
+    }
+
+    fs.readFile(imagePath, (err, data) => {
       if (err) {
-          console.log('Error reading file:', err);
-          return res.status(500).send({ error: 'Failed to read file' });
+        console.log('Error reading file:', err);
+        return res.status(500).send({ error: 'Failed to read file' });
+      }
+
+      // Find the position of bytes FF D9
+      const eoiIndex = data.lastIndexOf(Buffer.from([0xFF, 0xD9]));
+
+      if (eoiIndex === -1) {
+          return res.status(500).send({ error: 'No EOI marker found' });
+      }
+
+      // Create a new buffer: data up to FF D9
+      const newBuffer = data.slice(0, eoiIndex + 2);
+
+      // Write the new buffer back to the image file
+      fs.writeFile(imagePath, newBuffer, (err) => {
+        if (err) {
+            console.log('Error writing to file:', err);
+            return res.status(500).send({ error: 'Failed to write to file' });
+        }
+
+        console.log('Message cleared successfully');
+        res.send({ message: 'Secret Message Cleared Successfully!' });
+      });
+    });
+  });
+});
+
+// Clears all of the photos out of the uploads folder
+app.post('/clear-uploads', (req, res) => {
+  const directoryPath = path.join(__dirname, 'uploads');
+
+  fs.readdir(directoryPath, (err, files) => {
+      if (err) {
+          return res.status(500).send({ error: 'Unable to scan directory' });
+      }
+      
+      for (const file of files) {
+          fs.unlink(path.join(directoryPath, file), err => {
+              if (err) {
+                  return res.status(500).send({ error: 'Failed to delete file ' + file });
+              }
+          });
+      }
+
+      res.send({ success: 'All files deleted successfully' });
+  });
+});
+
+app.get('/get-first-image-message', (req, res) => {
+  getFirstImagePath((err, imagePath) => {
+    if (err || !imagePath) {
+      console.log('Error fetching the image path:', err);
+      return res.status(404).send({ error: 'No files found in the uploads directory' });
+    }
+
+    fs.readFile(imagePath, (err, data) => {
+      if (err) {
+        console.log('Error reading file:', err);
+        return res.status(500).send({ error: 'Failed to read file' });
       }
 
       const eoiIndex = data.lastIndexOf(Buffer.from([0xFF, 0xD9]));
 
       if (eoiIndex !== -1) {
-          const secretMessageBuffer = data.slice(eoiIndex + 2);
-          const secretMessage = secretMessageBuffer.toString();
-          res.send({ message: secretMessage });
+        const secretMessageBuffer = data.slice(eoiIndex + 2);
+        const secretMessage = secretMessageBuffer.toString();
+        res.send({ message: secretMessage });
       } else {
-          res.status(404).send({ error: 'No secret message found' });
+        res.status(404).send({ error: 'No secret message found' });
       }
+    });
   });
 });
   
@@ -129,18 +180,16 @@ app.post('/add-message', (req, res) => {
       return res.status(400).send({ error: 'Message is required' });
   }
 
-  // Check if there's a current file in the user's session
-  if (!req.session.currentFilePath) {
-      return res.status(404).send({ error: 'No file uploaded during this session' });
-  }
+  getFirstImagePath((err, imagePath) => {
+    if (err || !imagePath) {
+      console.log('Error fetching the image path:', err);
+      return res.status(404).send({ error: 'No files found in the uploads directory' });
+    }
 
-  // Use the file path from the session
-  const filePath = req.session.currentFilePath;
-
-  fs.readFile(filePath, (err, data) => {
+    fs.readFile(imagePath, (err, data) => {
       if (err) {
-          console.log('Error reading file:', err);
-          return res.status(500).send({ error: 'Failed to read file' });
+        console.log('Error reading file:', err);
+        return res.status(500).send({ error: 'Failed to read file' });
       }
 
       // Find the position of bytes FF D9
@@ -157,15 +206,16 @@ app.post('/add-message', (req, res) => {
       ]);
 
       // Write the new buffer back to the image file
-      fs.writeFile(filePath, newBuffer, (err) => {
-          if (err) {
-              console.log('Error writing to file:', err);
-              return res.status(500).send({ error: 'Failed to write to file' });
-          }
+      fs.writeFile(imagePath, newBuffer, (err) => {
+        if (err) {
+            console.log('Error writing to file:', err);
+            return res.status(500).send({ error: 'Failed to write to file' });
+        }
 
-          console.log('Message added successfully');
-          res.send({ message: 'Secret Message Added Successfully!' });
+        console.log('Message added successfully');
+        res.send({ message: 'Secret Message Added Successfully!' });
       });
+    });
   });
 });
 

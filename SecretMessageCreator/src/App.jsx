@@ -19,9 +19,9 @@ function App() {
         <div className="image-background">
           <p>No Image Uploaded</p>
         </div>
-
-        <CurrentMessage />
         <AddSecretMessage />
+        <CurrentMessage />
+        
         <ImageDownload />
 
         <p className="credit">William Krajcovic 2023</p>

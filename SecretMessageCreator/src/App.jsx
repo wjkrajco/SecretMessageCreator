@@ -16,9 +16,6 @@ function App() {
         <Nav />
         <ImageUpload />
 
-        <div className="image-background">
-          <p>No Image Uploaded</p>
-        </div>
         <AddSecretMessage />
         <CurrentMessage />
         

@@ -45,7 +45,12 @@ export default function ImageUpload() {
         <input className="choose-file-button" type="file" id="imageUpload" accept="image/*" ref={fileInput} />
         <button type="button" onClick={previewImageFunction}>Preview & Upload</button>
       </form>
-      {previewURL && <img id="preview" src={previewURL} alt="Image preview" />}
+      
+      {previewURL ? <img id="preview" src={previewURL} alt="Image preview" /> : 
+        <div className="image-background">
+            <p>No Image Uploaded</p>
+        </div>
+      }
     </>
   );
 }

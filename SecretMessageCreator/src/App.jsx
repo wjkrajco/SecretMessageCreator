@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import CurrentMessage from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/CurrentMessage.jsx"
-import AddSecretMessage from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/AddSecretMessage"
-import ImageUpload from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/ImageUpload.jsx"
+import CurrentMessage from "./components/CurrentMessage.jsx"
+import AddSecretMessage from "./components/AddSecretMessage"
+import ImageUpload from "./components/ImageUpload.jsx"
 import './App.css'
-import ImageDownload from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/ImageDownload.jsx"
-import Nav from "/home/wjkrajco/personalprojects/SecretMessageCreator/SecretMessageCreator/src/components/Nav.jsx"
+import ImageDownload from "./components/ImageDownload.jsx"
+import Nav from "./components/Nav.jsx"
 
 
 function App() {

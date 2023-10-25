@@ -18,24 +18,31 @@ app.use(cors({
 const storage = multer.diskStorage({
   destination: './uploads',
   filename: function (req, file, cb) {
+    // Call back function used to upload unique name for file
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   },
 });
 
+// Configures multer to handle a file upload and expect image
 const upload = multer({
   storage: storage,
   limits: { fileSize: 1000000 },
+  // Filters files that should be accepted 
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
 }).single('image');
 
+// Checks if the file is valid for type and calls to multer to upload
 function checkFileType(file, cb) {
   // Allowed extensions and ensures files types
   const filetypes = /jpeg|jpg|png|gif/;
+  // Checks for the file extnesion and changes to lower case
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Checks against the allowed types
   const mimetype = filetypes.test(file.mimetype);
 
+  // Call to multer to upload file assuming type is right
   if (extname && mimetype) {
     return cb(null, true);
   } else {
@@ -44,29 +51,34 @@ function checkFileType(file, cb) {
 }
 
 function getFirstImagePath(callback) {
+  // Used to find upload directory
   const uploadDir = path.join(__dirname, 'uploads');
   
   // Read the directory to get filenames
   fs.readdir(uploadDir, (err, files) => {
     if (err) {
+      // Calls to main call back function with error
       callback(err);
       return;
     }
     
-    const imagePath = files.length > 0 ? path.join(uploadDir, files[0]) : null; // Get the path of the first file or null if no files
+    // Gets the image path 
+    const imagePath = files.length > 0 ? path.join(uploadDir, files[0]) : null;
     callback(null, imagePath);
   });
 }
 
 // Handle file upload
 app.post('/uploads', (req, res) => {
+  // Multer middleware to upload file
   upload(req, res, (err) => {
     if (err) {
-      res.status(400).send({ error: err }); // Send error as JSON
+      res.status(400).send({ error: err });
     } else {
       const uploadedFilePath = path.join(__dirname, 'uploads', req.file.filename);
 
       console.log('File uploaded successfully to', uploadedFilePath);
+      // JSON object is sent back to the client
       res.send({ filePath: uploadedFilePath, message: 'File Uploaded Successfully!' });
     }
   });
@@ -128,13 +140,17 @@ app.post('/clear-message', (req, res) => {
 
 // Clears all of the photos out of the uploads folder
 app.post('/clear-uploads', (req, res) => {
+
+  // Gets the path of the uploads
   const directoryPath = path.join(__dirname, 'uploads');
 
+  // Reads whats in the uploads
   fs.readdir(directoryPath, (err, files) => {
       if (err) {
           return res.status(500).send({ error: 'Unable to scan directory' });
       }
       
+      // Removes all the files from the uploads path
       for (const file of files) {
           fs.unlink(path.join(directoryPath, file), err => {
               if (err) {
@@ -147,6 +163,7 @@ app.post('/clear-uploads', (req, res) => {
   });
 });
 
+// Gets the message from the first image
 app.get('/get-first-image-message', (req, res) => {
   getFirstImagePath((err, imagePath) => {
     if (err || !imagePath) {
@@ -154,6 +171,7 @@ app.get('/get-first-image-message', (req, res) => {
       return res.status(404).send({ error: 'No files found in the uploads directory' });
     }
 
+    // Reads the file from the given path
     fs.readFile(imagePath, (err, data) => {
       if (err) {
         console.log('Error reading file:', err);
@@ -162,11 +180,13 @@ app.get('/get-first-image-message', (req, res) => {
 
       const eoiIndex = data.lastIndexOf(Buffer.from([0xFF, 0xD9]));
 
+      // Takes out and sends the message
       if (eoiIndex !== -1) {
         const secretMessageBuffer = data.slice(eoiIndex + 2);
         const secretMessage = secretMessageBuffer.toString();
         res.send({ message: secretMessage });
       } else {
+        // Error if there is no message
         res.status(404).send({ error: 'No secret message found' });
       }
     });
@@ -177,6 +197,7 @@ app.get('/get-first-image-message', (req, res) => {
 app.post('/add-message', (req, res) => {
   const { message } = req.body;
 
+  // Error if there is no message
   if (!message) {
       return res.status(400).send({ error: 'Message is required' });
   }
@@ -187,6 +208,7 @@ app.post('/add-message', (req, res) => {
       return res.status(404).send({ error: 'No files found in the uploads directory' });
     }
 
+    // Reads the image at the path
     fs.readFile(imagePath, (err, data) => {
       if (err) {
         console.log('Error reading file:', err);
@@ -220,12 +242,12 @@ app.post('/add-message', (req, res) => {
   });
 });
 
-  // Add this code below your routes and before starting the server:
-  app.use((err, req, res, next) => {
+ // Managees access control through CORS and it allows access from any origin
+ app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.header('Access-Control-Allow-Origin', '*'); // Add CORS header
+    res.header('Access-Control-Allow-Origin', '*');
     res.status(500).send({ error: 'An internal error occurred.' });
-});
+ });
 
 
   

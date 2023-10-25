@@ -1,3 +1,4 @@
+// Allows for asynchornus HTTP requests
 import axios from "axios";
 
 export default function AddSecretMessage() {
@@ -10,7 +11,7 @@ export default function AddSecretMessage() {
             message: inputValue
         };
 
-        // Send POST request to the server
+        // Send post request to the server
         axios.post('http://localhost:3000/add-message', data)
             .then(response => {
                 alert('Secret message added successfully!');
@@ -20,6 +21,7 @@ export default function AddSecretMessage() {
             });
     }
 
+    // Sends a post to clear to message of the first image in the folder
     const clearMessage = () => {
         axios.post('http://localhost:3000/clear-message')
             .then(response => {

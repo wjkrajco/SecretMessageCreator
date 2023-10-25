@@ -1,11 +1,12 @@
 import React, { useRef } from "react";
 import axios from "axios";
 
+// Used to allow the user to Download the image
 export default function ImageDownload() {
+
+  // This allows for the access of DOM elements directly
   const downloadRef = useRef(null);
 
-
-  
 
   function download() {
     axios({
@@ -14,8 +15,12 @@ export default function ImageDownload() {
       responseType: 'blob', 
     })
     .then(response => {
+      // Creates a url from the file
       const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Attach the url to the hook
       const link = downloadRef.current;
+
+      // Uses a hidden anchor and click to allow for the download
       link.href = url;
       link.setAttribute('download', 'image.jpg'); 
       link.click();
